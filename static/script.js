@@ -3,42 +3,49 @@ document.addEventListener('DOMContentLoaded', function() {
     const urlInput = document.getElementById('url-input');
     const markdownOutput = document.getElementById('markdown-output');
     const loading = document.getElementById('loading');
-    const statusMessages = document.getElementById('statusMessages');
+    const statusElements = {
+        scraping: document.getElementById('status-scraping'),
+        extracting: document.getElementById('status-extracting'),
+        complete: document.getElementById('status-complete')
+    };
 
-    function addStatusMessage(message) {
-        if (!statusMessages) return;
+    function resetStatus() {
+        Object.values(statusElements).forEach(element => {
+            if (element) {
+                element.classList.add('d-none');
+                element.classList.remove('text-success');
+                element.classList.add('text-secondary');
+            }
+        });
+    }
 
-        const timestamp = new Date().toLocaleTimeString();
-        const messageElement = document.createElement('div');
-        messageElement.className = 'list-group-item bg-dark border-info';
-        messageElement.innerHTML = `
-            <div class="d-flex align-items-center">
-                <div class="flex-grow-1">
-                    <p class="mb-0">${message}</p>
-                    <small class="text-muted">(${timestamp})</small>
-                </div>
-            </div>
-        `;
+    function updateStatus(step) {
+        const steps = ['scraping', 'extracting', 'complete'];
+        const currentIndex = steps.indexOf(step);
         
-        statusMessages.querySelector('.list-group').appendChild(messageElement);
-        statusMessages.classList.remove('d-none');
-        messageElement.scrollIntoView({ behavior: 'smooth' });
+        steps.forEach((s, index) => {
+            const element = statusElements[s];
+            if (element) {
+                if (index <= currentIndex) {
+                    element.classList.remove('d-none');
+                    if (index < currentIndex) {
+                        element.classList.remove('text-secondary');
+                        element.classList.add('text-success');
+                    }
+                }
+            }
+        });
     }
 
     form.addEventListener('submit', function(e) {
         e.preventDefault();
         const url = urlInput.value;
 
-        // Reset and show UI elements
+        // Reset UI elements
         loading.classList.remove('d-none');
         markdownOutput.textContent = '';
-        if (statusMessages) {
-            statusMessages.querySelector('.list-group').innerHTML = '';
-            statusMessages.classList.remove('d-none');
-        }
-
-        // Initial status message
-        addStatusMessage('Scraping URL...');
+        resetStatus();
+        updateStatus('scraping');
 
         // Create form data
         const formData = new FormData();
@@ -50,7 +57,7 @@ document.addEventListener('DOMContentLoaded', function() {
             body: formData
         })
         .then(response => {
-            addStatusMessage('Extracting article contents...');
+            updateStatus('extracting');
             return response.json();
         })
         .then(data => {
@@ -58,17 +65,15 @@ document.addEventListener('DOMContentLoaded', function() {
             loading.classList.add('d-none');
 
             if (data.success) {
-                addStatusMessage('Article extracted!');
+                updateStatus('complete');
                 markdownOutput.textContent = data.markdown;
             } else {
-                addStatusMessage('Error: ' + data.error);
                 markdownOutput.textContent = `Error: ${data.error}`;
             }
         })
         .catch(error => {
             // Hide loading spinner
             loading.classList.add('d-none');
-            addStatusMessage('Error: ' + error.message);
             markdownOutput.textContent = `Error: ${error.message}`;
         });
     });
