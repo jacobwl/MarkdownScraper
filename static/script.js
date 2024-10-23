@@ -12,30 +12,22 @@ document.addEventListener('DOMContentLoaded', function() {
     function resetStatus() {
         Object.values(statusElements).forEach(element => {
             if (element) {
-                element.classList.add('d-none');
-                element.classList.remove('text-success');
                 element.classList.add('text-secondary');
+                element.classList.remove('text-success');
+                element.style.display = 'none';
             }
         });
     }
 
     function updateStatus(step) {
-        const steps = ['scraping', 'extracting', 'complete'];
-        const currentIndex = steps.indexOf(step);
-        
-        steps.forEach((s, index) => {
-            const element = statusElements[s];
-            if (element) {
-                if (index <= currentIndex) {
-                    element.classList.remove('d-none');
-                    if (index < currentIndex) {
-                        element.classList.remove('text-secondary');
-                        element.classList.add('text-success');
-                    }
-                }
-            }
-        });
+        const element = statusElements[step];
+        if (element) {
+            element.style.display = 'block';
+        }
     }
+
+    // Initialize by hiding all status messages
+    resetStatus();
 
     form.addEventListener('submit', function(e) {
         e.preventDefault();
