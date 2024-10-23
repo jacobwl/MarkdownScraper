@@ -19,10 +19,11 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    function updateStatus(step) {
+    function completeStatus(step) {
         const element = statusElements[step];
         if (element) {
-            element.style.display = 'block';
+            element.classList.remove('text-secondary');
+            element.classList.add('text-success');
         }
     }
 
@@ -37,7 +38,9 @@ document.addEventListener('DOMContentLoaded', function() {
         loading.classList.remove('d-none');
         markdownOutput.textContent = '';
         resetStatus();
-        updateStatus('scraping');
+        
+        // Show first status
+        statusElements.scraping.style.display = 'block';
 
         // Create form data
         const formData = new FormData();
@@ -49,22 +52,22 @@ document.addEventListener('DOMContentLoaded', function() {
             body: formData
         })
         .then(response => {
-            updateStatus('extracting');
+            completeStatus('scraping');
+            statusElements.extracting.style.display = 'block';
             return response.json();
         })
         .then(data => {
-            // Hide loading spinner
             loading.classList.add('d-none');
-
             if (data.success) {
-                updateStatus('complete');
+                completeStatus('extracting');
+                statusElements.complete.style.display = 'block';
+                completeStatus('complete');
                 markdownOutput.textContent = data.markdown;
             } else {
                 markdownOutput.textContent = `Error: ${data.error}`;
             }
         })
         .catch(error => {
-            // Hide loading spinner
             loading.classList.add('d-none');
             markdownOutput.textContent = `Error: ${error.message}`;
         });
