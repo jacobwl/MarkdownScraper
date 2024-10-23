@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const urlInput = document.getElementById('url-input');
     const markdownOutput = document.getElementById('markdown-output');
     const loading = document.getElementById('loading');
+    const markdownHeading = document.getElementById('markdown-heading');
 
     form.addEventListener('submit', function(e) {
         e.preventDefault();
@@ -11,6 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Reset UI elements
         loading.classList.remove('d-none');
         markdownOutput.textContent = '';
+        markdownHeading.classList.remove('d-none'); // Show the heading when form is submitted
 
         // Create form data
         const formData = new FormData();
