@@ -3,12 +3,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const urlInput = document.getElementById('url-input');
     const markdownOutput = document.getElementById('markdown-output');
     const loading = document.getElementById('loading');
+    
+    // Initialize status elements after DOM is loaded
     const statusElements = {
         scraping: document.getElementById('status-scraping'),
         extracting: document.getElementById('status-extracting'),
         complete: document.getElementById('status-complete')
     };
 
+    // Add null checks before accessing style
     function resetStatus() {
         Object.values(statusElements).forEach(element => {
             if (element) {
@@ -39,8 +42,10 @@ document.addEventListener('DOMContentLoaded', function() {
         markdownOutput.textContent = '';
         resetStatus();
         
-        // Show first status
-        statusElements.scraping.style.display = 'block';
+        // Show first status with null check
+        if (statusElements.scraping) {
+            statusElements.scraping.style.display = 'block';
+        }
 
         // Create form data
         const formData = new FormData();
@@ -52,16 +57,24 @@ document.addEventListener('DOMContentLoaded', function() {
             body: formData
         })
         .then(response => {
-            completeStatus('scraping');
-            statusElements.extracting.style.display = 'block';
+            if (statusElements.scraping) {
+                completeStatus('scraping');
+            }
+            if (statusElements.extracting) {
+                statusElements.extracting.style.display = 'block';
+            }
             return response.json();
         })
         .then(data => {
             loading.classList.add('d-none');
             if (data.success) {
-                completeStatus('extracting');
-                statusElements.complete.style.display = 'block';
-                completeStatus('complete');
+                if (statusElements.extracting) {
+                    completeStatus('extracting');
+                }
+                if (statusElements.complete) {
+                    statusElements.complete.style.display = 'block';
+                    completeStatus('complete');
+                }
                 markdownOutput.textContent = data.markdown;
             } else {
                 markdownOutput.textContent = `Error: ${data.error}`;
