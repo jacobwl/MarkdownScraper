@@ -11,15 +11,21 @@ document.addEventListener('DOMContentLoaded', function() {
         complete: document.getElementById('status-complete')
     };
 
-    // Add null checks before accessing style
     function resetStatus() {
         Object.values(statusElements).forEach(element => {
             if (element) {
                 element.classList.add('text-secondary');
                 element.classList.remove('text-success');
-                element.style.display = 'none';
+                element.style.opacity = '0';
             }
         });
+    }
+
+    function updateStatus(step) {
+        const element = statusElements[step];
+        if (element) {
+            element.style.opacity = '0.7';
+        }
     }
 
     function completeStatus(step) {
@@ -27,6 +33,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (element) {
             element.classList.remove('text-secondary');
             element.classList.add('text-success');
+            element.style.opacity = '1';
         }
     }
 
@@ -42,10 +49,8 @@ document.addEventListener('DOMContentLoaded', function() {
         markdownOutput.textContent = '';
         resetStatus();
         
-        // Show first status with null check
-        if (statusElements.scraping) {
-            statusElements.scraping.style.display = 'block';
-        }
+        // Show first status
+        updateStatus('scraping');
 
         // Create form data
         const formData = new FormData();
@@ -57,24 +62,16 @@ document.addEventListener('DOMContentLoaded', function() {
             body: formData
         })
         .then(response => {
-            if (statusElements.scraping) {
-                completeStatus('scraping');
-            }
-            if (statusElements.extracting) {
-                statusElements.extracting.style.display = 'block';
-            }
+            completeStatus('scraping');
+            updateStatus('extracting');
             return response.json();
         })
         .then(data => {
             loading.classList.add('d-none');
             if (data.success) {
-                if (statusElements.extracting) {
-                    completeStatus('extracting');
-                }
-                if (statusElements.complete) {
-                    statusElements.complete.style.display = 'block';
-                    completeStatus('complete');
-                }
+                completeStatus('extracting');
+                updateStatus('complete');
+                completeStatus('complete');
                 markdownOutput.textContent = data.markdown;
             } else {
                 markdownOutput.textContent = `Error: ${data.error}`;
