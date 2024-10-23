@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Reset UI elements
         loading.classList.remove('d-none');
         markdownOutput.textContent = '';
-        markdownHeading.classList.remove('d-none'); // Show the heading when form is submitted
+        markdownHeading.classList.add('d-none'); // Hide heading on new submission
 
         // Create form data
         const formData = new FormData();
@@ -27,13 +27,16 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(data => {
             loading.classList.add('d-none');
             if (data.success) {
+                markdownHeading.classList.remove('d-none');  // Show heading only on success
                 markdownOutput.textContent = data.markdown;
             } else {
+                markdownHeading.classList.add('d-none');     // Hide heading on error
                 markdownOutput.textContent = `Error: ${data.error}`;
             }
         })
         .catch(error => {
             loading.classList.add('d-none');
+            markdownHeading.classList.add('d-none');         // Hide heading on error
             markdownOutput.textContent = `Error: ${error.message}`;
         });
     });
