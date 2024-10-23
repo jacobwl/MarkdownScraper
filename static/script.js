@@ -11,12 +11,14 @@ document.addEventListener('DOMContentLoaded', function() {
         complete: document.getElementById('status-complete')
     };
 
+    console.log('Status Elements:', statusElements); // Debug line
+
     function resetStatus() {
         Object.values(statusElements).forEach(element => {
             if (element) {
                 element.classList.add('text-secondary');
                 element.classList.remove('text-success');
-                element.style.opacity = '0';
+                element.style.opacity = '0.7'; // Changed from 0 to make them visible by default
             }
         });
     }
@@ -36,9 +38,6 @@ document.addEventListener('DOMContentLoaded', function() {
             element.style.opacity = '1';
         }
     }
-
-    // Initialize by hiding all status messages
-    resetStatus();
 
     form.addEventListener('submit', function(e) {
         e.preventDefault();
