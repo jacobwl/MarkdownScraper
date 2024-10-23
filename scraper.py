@@ -2,6 +2,29 @@ import requests
 from bs4 import BeautifulSoup
 import html2text
 from urllib.parse import urlparse
+import openai
+import os
+
+def extract_with_gpt(text):
+    client = openai.OpenAI(api_key=os.environ.get('OPENAI_API_KEY'))
+    
+    system_prompt = """You are a helpful assistant that extracts the main article content from web pages.
+    Extract only the main article content, removing navigation, headers, footers, ads, and other irrelevant content.
+    Format the response in clean markdown."""
+    
+    try:
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": f"Extract and format the main article content from this HTML content:\n\n{text}"}
+            ],
+            max_tokens=1500,
+            temperature=0.3
+        )
+        return response.choices[0].message.content
+    except Exception as e:
+        raise Exception(f"Error using GPT for content extraction: {str(e)}")
 
 def scrape_and_convert(url):
     # Validate URL
@@ -18,10 +41,16 @@ def scrape_and_convert(url):
 
     # Parse HTML
     soup = BeautifulSoup(response.text, 'html.parser')
-
-    # Convert to Markdown
+    
+    # First convert to markdown using html2text
     h = html2text.HTML2Text()
     h.ignore_links = False
-    markdown_content = h.handle(str(soup))
-
-    return markdown_content
+    initial_markdown = h.handle(str(soup))
+    
+    # Then use GPT to extract and clean the content
+    try:
+        markdown_content = extract_with_gpt(initial_markdown)
+        return markdown_content
+    except Exception as e:
+        # Fallback to regular html2text if GPT fails
+        return initial_markdown
