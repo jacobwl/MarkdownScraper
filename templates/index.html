@@ -14,13 +14,15 @@
                 <label for="url-input" class="form-label">Enter URL:</label>
                 <input type="url" class="form-control" id="url-input" required>
             </div>
-            <button type="submit" class="btn btn-primary">Extract Article with GPT</button>
+            <button type="submit" class="btn btn-primary">Article as Markdown</button>
         </form>
         <div class="mt-4">
-            <div id="status-messages" class="alert alert-info d-none">
-                <div id="status-text">Processing...</div>
-                <div class="progress mt-2" style="height: 5px;">
-                    <div id="status-progress" class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div>
+            <div id="status-container">
+                <div id="status-messages" class="alert alert-info d-none">
+                    <div id="status-text">Processing...</div>
+                    <div class="progress mt-2" style="height: 5px;">
+                        <div id="status-progress" class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div>
+                    </div>
                 </div>
             </div>
             <h2>Converted Markdown:</h2>

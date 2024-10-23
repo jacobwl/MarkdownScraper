@@ -1,28 +1,47 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('scrape-form');
-    const urlInput = document.getElementById('url-input');
-    const markdownOutput = document.getElementById('markdown-output');
-    const loading = document.getElementById('loading');
-    const statusMessages = document.getElementById('status-messages');
-    const statusText = document.getElementById('status-text');
-    const statusProgress = document.getElementById('status-progress');
+    // Get DOM elements
+    const elements = {
+        form: document.getElementById('scrape-form'),
+        urlInput: document.getElementById('url-input'),
+        markdownOutput: document.getElementById('markdown-output'),
+        loading: document.getElementById('loading'),
+        statusMessages: document.getElementById('status-messages'),
+        statusText: document.getElementById('status-text'),
+        statusProgress: document.getElementById('status-progress')
+    };
 
-    function updateStatus(message, progress) {
-        statusMessages.classList.remove('d-none');
-        statusText.textContent = message;
-        statusProgress.style.width = `${progress}%`;
+    // Verify all elements exist
+    for (const [key, element] of Object.entries(elements)) {
+        if (!element) {
+            console.error(`Element ${key} not found in the DOM`);
+            return;
+        }
     }
 
-    form.addEventListener('submit', function(e) {
+    function updateStatus(message, progress) {
+        if (elements.statusMessages && elements.statusText && elements.statusProgress) {
+            elements.statusMessages.classList.remove('d-none');
+            elements.statusText.textContent = message;
+            elements.statusProgress.style.width = `${progress}%`;
+        }
+    }
+
+    function hideStatus() {
+        if (elements.statusMessages) {
+            elements.statusMessages.classList.add('d-none');
+        }
+    }
+
+    elements.form.addEventListener('submit', function(e) {
         e.preventDefault();
-        const url = urlInput.value;
+        const url = elements.urlInput.value;
 
         // Show loading spinner and reset output
-        loading.classList.remove('d-none');
-        markdownOutput.textContent = '';
+        elements.loading.classList.remove('d-none');
+        elements.markdownOutput.textContent = '';
         
-        // Update initial status
-        updateStatus('Fetching webpage...', 20);
+        // Initial status - Scraping URL
+        updateStatus('Scraping URL...', 20);
 
         // Create form data
         const formData = new FormData();
@@ -34,30 +53,33 @@ document.addEventListener('DOMContentLoaded', function() {
             body: formData
         })
         .then(response => {
-            updateStatus('Processing content with GPT...', 60);
+            // Update status - Processing with OpenAI
+            updateStatus('Extracting article contents...', 60);
             return response.json();
         })
         .then(data => {
-            // Hide loading spinner and status
-            loading.classList.add('d-none');
-            statusMessages.classList.add('d-none');
+            // Hide loading spinner
+            elements.loading.classList.add('d-none');
 
             if (data.success) {
-                markdownOutput.textContent = data.markdown;
-                updateStatus('Content extracted successfully!', 100);
-                setTimeout(() => statusMessages.classList.add('d-none'), 2000);
+                elements.markdownOutput.textContent = data.markdown;
+                // Final status - Article extracted
+                updateStatus('Article extracted!', 100);
+                setTimeout(hideStatus, 2000);
             } else {
-                markdownOutput.textContent = `Error: ${data.error}`;
+                elements.markdownOutput.textContent = `Error: ${data.error}`;
                 updateStatus('Error occurred during processing', 100);
-                statusMessages.classList.remove('alert-info').addClass('alert-danger');
+                elements.statusMessages.classList.remove('alert-info');
+                elements.statusMessages.classList.add('alert-danger');
             }
         })
         .catch(error => {
             // Hide loading spinner
-            loading.classList.add('d-none');
-            markdownOutput.textContent = `Error: ${error.message}`;
+            elements.loading.classList.add('d-none');
+            elements.markdownOutput.textContent = `Error: ${error.message}`;
             updateStatus('Error occurred during processing', 100);
-            statusMessages.classList.remove('alert-info').addClass('alert-danger');
+            elements.statusMessages.classList.remove('alert-info');
+            elements.statusMessages.classList.add('alert-danger');
         });
     });
 });
